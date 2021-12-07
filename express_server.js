@@ -11,8 +11,7 @@ function generateRandomString() {
     var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;
     for ( var i = 0; i < 6; i++ ) {
-      result += characters.charAt(Math.floor(Math.random() * 
- charactersLength));
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
    }
    return result;
 };
@@ -40,13 +39,9 @@ app.get("/hello", (req, res) => {
   });
 
 app.get("/u/:shortURL", (req, res) => {  
-    const shortURL = req.params.shortURL;
-      if (urlDatabase[shortURL]) { 
-  const  {longURL , userID}  = urlDatabase[shortURL];
+    const longURL = urlDatabase[req.params.shortURL];
    res.redirect(longURL);
-   } else {
-     res.status(400).send(`<p>Invalid ShortURL : ${shortURL}</p>`);  
-     }
+  
   });
 
   app.get("/urls/new", (req, res) => {
@@ -58,10 +53,20 @@ app.get("/u/:shortURL", (req, res) => {
     res.render("urls_show", templateVars);
   });
 
-  app.post("/urls", (req, res) => {
-    //console.log(req.body);  // Log the POST request body to the console
-    //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  app.get("/urls/:shortURL", (req, res) => {
+    const shortURL = req.params.shortURL;
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: req.params.longURL
+    }
+    res.render("urls_show", templateVars);
+});
 
+  app.post("/urls", (req, res) => {
+    const newShortUrl = generateRandomString();
+    const longNewURL = req.body.longURL;
+    urlDatabase[newShortUrl] = longNewURL;
+    res.redirect("/urls");
   });
 
 app.listen(PORT, () => {
