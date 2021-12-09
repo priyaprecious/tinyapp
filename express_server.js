@@ -63,8 +63,9 @@ app.get("/", (req, res) => {
             users: user
           };
         res.render("urls_index", templateVars);
+    } else {
+        res.status(400).send("Please <a href='/login'> Login</a> or <a href='/register'> Register</a> to create/view tiny urls")
     }
-    res.redirect("/login");
     });
 
   app.get("/register", (req, res) => {
@@ -141,7 +142,7 @@ app.get("/", (req, res) => {
     if (user) {
         return res.render("urls_new", {users: user});
     }
-    res.status(405).send("Not Authorized to create a new URL without Login <br/><a href ='/login'> Login here</a>");
+    res.status(405).send("Not Authorized to create a new URL without Login/Register <br/><a href ='/login'> Login </a> or <a href ='/register'> Register </a>");
   });
 
   app.post("/urls/new", (req, res) => {
@@ -153,19 +154,23 @@ app.get("/", (req, res) => {
   });
 
   app.get("/urls/:shortURL", (req, res) => {
-    const user = users[req.cookies["user_id"]];
-    if (user) {
-    const templateVars = 
-    {
-        shortURL: req.params.shortURL,
-        longURL: urlDatabase[req.params.shortURL].longURL,
-        users: users[req.cookies["user_id"]] };
-    res.render("urls_show", templateVars);
+    if (users[req.cookies["user_id"]]) {
+        if(urlDatabase[req.params.shortURL]){
+               const templateVars = 
+               {
+                   shortURL: req.params.shortURL,
+                   longURL: urlDatabase[req.params.shortURL].longURL,
+                   users: users[req.cookies["user_id"]] };
+                   res.render("urls_show", templateVars);
+        } else {
+            res
+            .status(405)
+            .send("Access Denied. Please check the short url and try again <br/><a href='/urls'> Main page </a>")
+        }
     }
     res
     .status(405)
-    .send("Not allowed to edit without login <br/><a href='/login'> Login here</a>")
-    res.redirect("/login");
+    .send("Invalid URL. <br/><a href='/login'> Login </a> or <a href='/register'> Register </a> ")
   });
 
 
@@ -196,12 +201,24 @@ app.get("/", (req, res) => {
   })
 
   app.post("/urls/:shortURL", (req, res) => {
+    if (users[req.cookies["user_id"]]) {
+        if(urlDatabase[req.params.shortURL]) {
+
     const shortURL = req.params.shortURL;
     urlDatabase[shortURL] = {
         longURL: req.body.longURL,
         userID: req.cookies["user_id"]
     };
     res.redirect("/urls");
+    } else {
+        res
+            .status(405)
+            .send("Access Denied. Please check the short url and try again <br/><a href='/urls'> Main page </a>")
+    }
+}
+    res
+    .status(405)
+    .send("Invalid URL. <br/><a href='/login'> Login </a> or <a href='/register'> Register </a>")
   })
 
 app.post("/logout", (req, res) => {  
