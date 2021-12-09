@@ -68,7 +68,7 @@ app.get("/", (req, res) => {
       return res.redirect("/urls");
     }
 
-    res.render("register", {users});
+    res.render("register", {users: user});
   })
 
   app.post("/register", (req, res) => {
@@ -90,6 +90,11 @@ app.get("/", (req, res) => {
     res.redirect("/urls");
     }
 
+  })
+
+  app.get("/login", (req, res) => {
+    const user = users[req.cookies["user_id"]];
+    return res.render("login", {users: user});
   })
 
   app.get("/hello", (req, res) => {
