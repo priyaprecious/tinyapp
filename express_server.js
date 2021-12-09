@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
-const { authenticateUserInfo } = require("./helper");
+const { authenticateUserInfo, emailLookUp, getUserByEmail } = require("./helper");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
@@ -97,6 +97,23 @@ app.get("/", (req, res) => {
     return res.render("login", {users: user});
   })
 
+  app.post("/login", (req, res) => {
+    const {email, password} = req.body;
+    const {error} = emailLookUp(email, users);
+    if (!error) {
+      res
+      .status(403)
+      .send(`Invalid User Please try again <a href ='/login'> Login </a>`);
+    } else {
+      const user = getUserByEmail(email, users);
+      if (password !== user["password"]) {
+        res.status(403).send("Invalid password Please try again <a href ='/login'> Login </a>")
+      }
+      res.cookie("user_id", user["id"]);
+      res.redirect("/urls");
+    }
+  });
+
   app.get("/hello", (req, res) => {
     res.send("<html><body>Hello <b>World</b></body></html>\n");
   });
@@ -109,7 +126,7 @@ app.get("/", (req, res) => {
 
   app.get("/urls/new", (req, res) => {
     const templateVars = {
-        username: req.cookies["username"]
+        users: users[req.cookies["user_id"]]
       };  
     res.render("urls_new", templateVars);
   });
@@ -117,7 +134,7 @@ app.get("/", (req, res) => {
   app.get("/urls/:shortURL", (req, res) => {
     const templateVars = { shortURL: req.params.shortURL,
          longURL: urlDatabase[req.params.shortURL],
-        username: req.cookies["username"] };
+        users: users[req.cookies["user_id"]] };
     res.render("urls_show", templateVars);
   });
 
@@ -126,7 +143,7 @@ app.get("/", (req, res) => {
     const templateVars = {
       shortURL: req.params.shortURL,
       longURL: req.params.longURL,
-      username: req.cookies["username"]
+      users: users[req.cookies["user_id"]]
     }
     res.render("urls_show", templateVars);
   });
@@ -150,15 +167,9 @@ app.get("/", (req, res) => {
     res.redirect("/urls");
   })
 
-app.post("/login", (req, res) => {
-    const username = req.body.username;
-    res.cookie("username", username);
-    res.redirect("/urls");
-})
-
 app.post("/logout", (req, res) => {  
   res.clearCookie("user_id");
-  res.redirect('/urls');
+  res.redirect('/login');
 })
 
 

@@ -25,7 +25,16 @@ const authenticateUserInfo = (email, password, users) => {
     return {error: null};
 }
 
+const getUserByEmail = (email, users) => {
+    for (let id in users) {
+        if (users[id].email === email) {
+            return users[id];
+        }
+    }
+}
+
 module.exports = {
     emailLookUp,
-    authenticateUserInfo
+    authenticateUserInfo,
+    getUserByEmail
 }
