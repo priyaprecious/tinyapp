@@ -33,8 +33,22 @@ const getUserByEmail = (email, users) => {
     }
 }
 
+const urlsForUser = (userID, urlDatabase) => {
+    const accessUrls = {};
+    for (const url in urlDatabase) {
+        if (urlDatabase[url].userID === userID.id) {
+            accessUrls[url] = {
+                longURL: urlDatabase[url].longURL,
+                userID: userID
+            };
+        }
+    } 
+    return accessUrls;
+}
+
 module.exports = {
     emailLookUp,
     authenticateUserInfo,
-    getUserByEmail
+    getUserByEmail,
+    urlsForUser
 }
