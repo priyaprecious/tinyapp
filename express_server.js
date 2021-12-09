@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
+const { authenticateUserInfo } = require("./helper");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
@@ -23,6 +24,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -31,13 +45,17 @@ app.get("/", (req, res) => {
     res.json(urlDatabase);
   });
 
+  app.get("/user.json", (req, res) => {
+    res.json(users);
+  });
+
   app.get("/urls", (req, res) => {
-      const cookie = req.cookies["username"];
+      const cookie = req.cookies["user_id"];
       if (cookie == " "){
           res.render("urls_index");
       } else {
     const templateVars = {
-        username: cookie,
+        users: users[cookie],
         urls: urlDatabase
       };
     res.render("urls_index", templateVars);
@@ -45,16 +63,33 @@ app.get("/", (req, res) => {
   });
 
   app.get("/register", (req, res) => {
-    const cookie = req.cookies["username"];
-    if (cookie == " "){
-        res.render("register");
-    } else {
-        const templateVars = {
-            username: cookie,
-            urls: urlDatabase
-          };
-        res.render("register", templateVars);
+    const user = users[req.cookies["user_id"]];
+    if (user) {
+      return res.redirect("/urls");
     }
+
+    res.render("register", {users});
+  })
+
+  app.post("/register", (req, res) => {
+    const {email, password} = req.body;
+    const {error} = authenticateUserInfo(email, password, users);
+    if (error) {
+      res
+      .status(400)
+      .send(`${error} <br/>Please try again  <a href="/register"> Register </a>`)
+    } else {
+    const randomUserId = generateRandomString();
+    res.cookie("user_id", randomUserId);
+    users[randomUserId] = 
+    {
+      "id": randomUserId,
+      "email": email,
+      "password": password
+    };
+    res.redirect("/urls");
+    }
+
   })
 
   app.get("/hello", (req, res) => {
@@ -116,11 +151,9 @@ app.post("/login", (req, res) => {
     res.redirect("/urls");
 })
 
-app.post("/logout", (req, res) => {
-    const username = req.body.username;
-    res.cookie("username", username);
-    res.clearCookie("username");
-    res.redirect('/urls');
+app.post("/logout", (req, res) => {  
+  res.clearCookie("user_id");
+  res.redirect('/urls');
 })
 
 
@@ -128,4 +161,3 @@ app.post("/logout", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
