@@ -44,6 +44,19 @@ app.get("/", (req, res) => {
       }
   });
 
+  app.get("/register", (req, res) => {
+    const cookie = req.cookies["username"];
+    if (cookie == " "){
+        res.render("register");
+    } else {
+        const templateVars = {
+            username: cookie,
+            urls: urlDatabase
+          };
+        res.render("register", templateVars);
+    }
+  })
+
   app.get("/hello", (req, res) => {
     res.send("<html><body>Hello <b>World</b></body></html>\n");
   });
