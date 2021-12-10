@@ -1,3 +1,4 @@
+//--------------function to verify if email exists
 const emailLookUp = (email, users) => {
     for (let user in users) {
         if (users[user]["email"] === email) {
@@ -7,6 +8,8 @@ const emailLookUp = (email, users) => {
     return {error: null};
 };
 
+//------------------function to see if email and password values provided by the users are not empty
+//-----------------and to verify if email exists----------------
 const authenticateUserInfo = (email, password, users) => {
     if(email.trim() == "" || !email) {
         return {error: "Invalid Email"};
@@ -25,6 +28,7 @@ const authenticateUserInfo = (email, password, users) => {
     return {error: null};
 }
 
+//---------------function to get the user details------------
 const getUserByEmail = (email, users) => {
     for (let id in users) {
         if (users[id].email === email) {
@@ -33,6 +37,7 @@ const getUserByEmail = (email, users) => {
     }
 }
 
+//-----------function to provide list of urls owned by the user-----------
 const urlsForUser = (userID, urlDatabase) => {
     const accessUrls = {};
     for (const url in urlDatabase) {
@@ -46,6 +51,7 @@ const urlsForUser = (userID, urlDatabase) => {
     return accessUrls;
 }
 
+//----------------function to generate random string of length 6 digits--------------
 function generateRandomString() {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
