@@ -3,10 +3,15 @@ const app = express();
 const PORT = 8080; // default port 8080
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+
+//---------------Express app uses EJS as it template engine-----------------
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
+
+//----------------- Importing helper functions------------------------
 const { authenticateUserInfo, emailLookUp, getUserByEmail, urlsForUser, generateRandomString } = require("./helpers");
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieSession({
     name: 'session',
@@ -210,7 +215,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //------------------user will be logged out and redirected to login page--------------------
 app.post("/logout", (req, res) => {
-    req.session = null;
+    req.session = null; //cookie-session is deleted
     res.redirect('/login');
 })
 
