@@ -156,10 +156,11 @@ app.get("/urls/:shortURL", (req, res) => {
                 .status(401)
                 .send("Short URL does not exist. Please check and try again <br/><a href='/urls'> Main page </a>")
         }
+    } else {
+        res
+            .status(401)
+            .send("Please <a href='/login'> Login </a> to proceed further ")
     }
-    res
-        .status(401)
-        .send("Please <a href='/login'> Login </a> to proceed further ")
 });
 
 //------------------------short urls are created for the corresponding user-------------------
@@ -173,8 +174,9 @@ app.post("/urls", (req, res) => {
             userID: user["id"]
         };
         res.redirect(`/urls/${newShortUrl}`);
+    } else {
+        res.status(401).send("Not Authorized to create a new URL without Login <br/><a href ='/login'> Login here</a>");
     }
-    res.status(401).send("Not Authorized to create a new URL without Login <br/><a href ='/login'> Login here</a>");
 });
 
 //----------------------delete short url-----------------------------
@@ -189,10 +191,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
         } else {
             res.status(401).send("Not Authorized to delete this shortURL");
         }
+    } else {
+        res
+            .status(401)
+            .send("Not allowed to delete without login <br/><a href='/login'> Login here</a>")
     }
-    res
-        .status(401)
-        .send("Not allowed to delete without login <br/><a href='/login'> Login here</a>")
 })
 
 //---------------------update short urls with new longURL----------------------------
@@ -215,10 +218,11 @@ app.post("/urls/:shortURL", (req, res) => {
                 .status(401)
                 .send("Please check the short url and try again <br/><a href='/urls'> Main page </a>")
         }
+    } else {
+        res
+            .status(400)
+            .send("Please <br/><a href='/login'> Login </a> or <a href='/register'> Register </a> first")
     }
-    res
-        .status(400)
-        .send("Please <br/><a href='/login'> Login </a> or <a href='/register'> Register </a> first")
 })
 
 //------------------user will be logged out and redirected to login page--------------------
