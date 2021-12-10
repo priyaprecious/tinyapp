@@ -154,7 +154,7 @@ app.get("/urls/:shortURL", (req, res) => {
     }
     res
         .status(405)
-        .send("Please <a href='/login'> Login </a> or <a href='/register'> Register </a> here")
+        .send("Please <a href='/login'> Login </a> to proceed further ")
 });
 
 //------------------------short urls are created for the corresponding user-------------------
@@ -167,7 +167,7 @@ app.post("/urls", (req, res) => {
             longURL: longNewURL,
             userID: user["id"]
         };
-        res.redirect("/urls");
+        res.redirect(`/urls/${newShortUrl}`);
     }
     res.status(405).send("Not Authorized to create a new URL without Login <br/><a href ='/login'> Login here</a>");
 });
