@@ -132,28 +132,33 @@ app.post("/urls/new", (req, res) => {
     if (user) {
         return res.render("urls_new", { users: user });
     }
-    res.status(405).send("Not Allowed to create a new URL without Login <br/><a href ='/login'> Login here</a>");
+    res.status(401).send("Not Allowed to create a new URL without Login <br/><a href ='/login'> Login here</a>");
 });
 
 //--------------------In the main page list of short urls and corresponding long urls are displayed--------------------
 app.get("/urls/:shortURL", (req, res) => {
     if (users[req.session.user_id]) {
         if (urlDatabase[req.params.shortURL]) {
-            const templateVars =
-            {
-                shortURL: req.params.shortURL,
-                longURL: urlDatabase[req.params.shortURL].longURL,
-                users: users[req.session.user_id]
-            };
-            res.render("urls_show", templateVars);
+            userURL = urlsForUser(users[req.session.user_id], urlDatabase);
+            if (Object.keys(userURL).includes(req.params.shortURL)) {
+                const templateVars =
+                {
+                    shortURL: req.params.shortURL,
+                    longURL: urlDatabase[req.params.shortURL].longURL,
+                    users: users[req.session.user_id]
+                };
+                res.render("urls_show", templateVars);
+            } else {
+                res.status(401).send("Short URL does not exist. Please check and try again <br/><a href='/urls'> Main page </a>")
+            }
         } else {
             res
-                .status(405)
-                .send("Short URL does not exist.Please check and try again <br/><a href='/urls'> Main page </a>")
+                .status(401)
+                .send("Short URL does not exist. Please check and try again <br/><a href='/urls'> Main page </a>")
         }
     }
     res
-        .status(405)
+        .status(401)
         .send("Please <a href='/login'> Login </a> to proceed further ")
 });
 
@@ -169,7 +174,7 @@ app.post("/urls", (req, res) => {
         };
         res.redirect(`/urls/${newShortUrl}`);
     }
-    res.status(405).send("Not Authorized to create a new URL without Login <br/><a href ='/login'> Login here</a>");
+    res.status(401).send("Not Authorized to create a new URL without Login <br/><a href ='/login'> Login here</a>");
 });
 
 //----------------------delete short url-----------------------------
@@ -177,7 +182,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     const user = users[req.session.user_id];
     if (user) {
         userURL = urlsForUser(user, urlDatabase);
-        console.log(userURL);
         if (Object.keys(userURL).includes(req.params.shortURL)) {
             const shortURL = req.params.shortURL;
             delete urlDatabase[shortURL];
@@ -195,28 +199,32 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
     if (users[req.session.user_id]) {
         if (urlDatabase[req.params.shortURL]) {
-
-            const shortURL = req.params.shortURL;
-            urlDatabase[shortURL] = {
-                longURL: req.body.longURL,
-                userID: req.session.user_id
-            };
-            res.redirect("/urls");
+            userURL = urlsForUser(users[req.session.user_id], urlDatabase);
+            if (Object.keys(userURL).includes(req.params.shortURL)) {
+                const shortURL = req.params.shortURL;
+                urlDatabase[shortURL] = {
+                    longURL: req.body.longURL,
+                    userID: req.session.user_id
+                };
+                res.redirect("/urls");
+            } else {
+                res.status(401).send("This short url does not belong to this user. Please check and try again");
+            }
         } else {
             res
-                .status(405)
-                .send("Access Denied. Please check the short url and try again <br/><a href='/urls'> Main page </a>")
+                .status(401)
+                .send("Please check the short url and try again <br/><a href='/urls'> Main page </a>")
         }
     }
     res
-        .status(405)
+        .status(400)
         .send("Please <br/><a href='/login'> Login </a> or <a href='/register'> Register </a> first")
 })
 
 //------------------user will be logged out and redirected to login page--------------------
 app.post("/logout", (req, res) => {
     req.session = null; //cookie-session is deleted
-    res.redirect('/login');
+    res.redirect('/urls');
 })
 
 
